@@ -12,7 +12,7 @@ class Server
 
         while (true) {
             var rep = new IPEndPoint(IPAddress.Any, 0);
-            Byte[] rec = virtualUdpClient.Receive(ref rep);
+            byte[] rec = virtualUdpClient.Receive(ref rep);
             string s = Encoding.UTF8.GetString(rec);
             Console.WriteLine(s);
         }

@@ -6,6 +6,7 @@ class Client
 {
     private const int DEFAULT_PORT = 6665;
     private const int DEFAULT_DEST_PORT = 6666;
+    private const string QUIT_COMMAND = "/quit";
 
     static void Main(String[] args)
     {
@@ -15,7 +16,9 @@ class Client
         while (true)
         {
             string message = Console.ReadLine() ?? string.Empty;
-            if (message == "/quit") return;
+            if (message == QUIT_COMMAND) return;
+            // jos syotteena tyhja merkkijono, ei laheteta
+            if (message == string.Empty) continue;
             byte[] data = Encoding.UTF8.GetBytes(message);
             try
             {
