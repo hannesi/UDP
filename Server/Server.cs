@@ -8,11 +8,11 @@ class Server
     static void Main(String[] args)
     {
         int port = args.Length > 0 ? int.Parse(args[0]) : DEFAULT_PORT;
-        var virtualUdpClient = new VirtualUdpClient(port);
+        var rdtReceive = new ReliableDataTransferReceive(port);
 
         while (true) {
             var rep = new IPEndPoint(IPAddress.Any, 0);
-            byte[] rec = virtualUdpClient.Receive(ref rep);
+            byte[] rec = rdtReceive.Receive(ref rep);
             string s = Encoding.UTF8.GetString(rec);
             Console.WriteLine(s);
         }

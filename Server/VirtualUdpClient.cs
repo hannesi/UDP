@@ -16,29 +16,25 @@ class VirtualUdpClient : UdpClient
     public VirtualUdpClient(int portti) : base(portti) { }
     public new byte[] Receive(ref IPEndPoint? remoteEP)
     {
-        while (true)
+        byte[] bytes = base.Receive(ref remoteEP);
+        // pudottaminen
+        if (random.NextDouble() <= packetDropChance)
         {
-            byte[] bytes = base.Receive(ref remoteEP);
-            // pudottaminen
-            if (random.NextDouble() <= packetDropChance)
-            {
-                Console.WriteLine("Paketti pudotettu!");
-                continue;
-            }
-            // bittivirhe
-            if (random.NextDouble() <= packetBitErrorChance)
-            {
-                Console.WriteLine("Pakettiin tullut bittivirhe!");
-                int errorByteIndex = random.Next(bytes.Length - 1);
-                bytes[errorByteIndex] ^= 1;
-            }
-            // viivastyminen
-            if (random.NextDouble() <= packetDelayChance)
-            {
-                Console.WriteLine("Paketti viivästyy!");
-                Thread.Sleep(packetDelayMs);
-            }
-            return bytes;
+            Console.WriteLine("Paketti pudotettu!");
         }
+        // bittivirhe
+        if (random.NextDouble() <= packetBitErrorChance)
+        {
+            Console.WriteLine("Pakettiin tullut bittivirhe!");
+            int errorByteIndex = random.Next(bytes.Length - 1);
+            bytes[errorByteIndex] ^= 1;
+        }
+        // viivastyminen
+        if (random.NextDouble() <= packetDelayChance)
+        {
+            Console.WriteLine("Paketti viivästyy!");
+            Thread.Sleep(packetDelayMs);
+        }
+        return bytes;
     }
 }

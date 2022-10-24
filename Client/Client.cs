@@ -12,7 +12,7 @@ class Client
     {
         int port = args.Length > 0 ? int.Parse(args[0]) : DEFAULT_PORT;
         int destPort = args.Length > 1 ? int.Parse(args[1]) : DEFAULT_DEST_PORT;
-        var udpClient = new UdpClient(port);
+        var rdtSend = new ReliableDataTransferSend(port);
         while (true)
         {
             string message = Console.ReadLine() ?? string.Empty;
@@ -22,7 +22,7 @@ class Client
             byte[] data = Encoding.UTF8.GetBytes(message);
             try
             {
-                udpClient.Send(data, data.Length, "localhost", destPort);
+                rdtSend.Send(data, "localhost", destPort);
             } 
             catch (Exception e)
             {
