@@ -9,7 +9,6 @@ internal class ReliableDataTransferSend
     public ReliableDataTransferSend(int port)
     {
         udpClient = new UdpClient(port);
-        Console.WriteLine("RDT Send initiated!");
     }
 
     internal void Send(byte[] data, string v, int destPort)

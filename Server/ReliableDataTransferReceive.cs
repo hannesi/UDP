@@ -10,7 +10,6 @@ internal class ReliableDataTransferReceive
     public ReliableDataTransferReceive(int port)
     {
         virtualUdp = new VirtualUdpClient(port);
-        Console.WriteLine("RDT Receive initiated!");
     }
 
     internal byte[] Receive(ref IPEndPoint rep)
@@ -19,11 +18,8 @@ internal class ReliableDataTransferReceive
         (bool valid, byte[] data) = ExtractPacket(packet);
         if (valid)
         {
-            Console.WriteLine("Checksums match");
-        } else
-        {
-            Console.WriteLine("Checksums don't match");
-        }
+            Console.WriteLine("Checksums don't match!");
+        } 
         return data;
     }
 

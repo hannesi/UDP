@@ -4,9 +4,9 @@ using System.Net.Sockets;
 class VirtualUdpClient : UdpClient
 {
     // paketin pudottamisen todennaikoisyys
-    private static double packetDropChance = 0.25;
+    private static double packetDropChance = 0;
     // paketin viivastyttamisen todennakoisyys
-    private static double packetDelayChance = 0.25;
+    private static double packetDelayChance = 0;
     // viivastyneen paketin viive ms
     private static int packetDelayMs = 1000;
     // bittivirheen todennakoisyys
