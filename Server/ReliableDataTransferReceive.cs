@@ -31,7 +31,7 @@ internal class ReliableDataTransferReceive
         return valid ? data : Array.Empty<byte>();
     }
 
-    private byte[] MakeACK(byte lastCorrectSeq)
+    private static byte[] MakeACK(byte lastCorrectSeq)
     {
         return Encoding.UTF8.GetBytes("ACK ").Concat(new byte[] {lastCorrectSeq}).ToArray();
     }
@@ -41,7 +41,7 @@ internal class ReliableDataTransferReceive
     /// </summary>
     /// <param name="packet">Datasta ja tarkastussummasta koostuva paketti</param>
     /// <returns>Tavutaulukot, joista ensimmainen sisaltaa datan ja jalkimmainen tarkastussumman</returns>
-    private (byte, byte[], byte[]) SplitPacket(byte[] packet)
+    private static (byte, byte[], byte[]) SplitPacket(byte[] packet)
     {
         byte sequenceNumber = packet.First();
         byte[] data = packet.Skip(SEQUENCE_LENGTH).Take(packet.Length - CHECKSUM_LENGTH - SEQUENCE_LENGTH).ToArray();
@@ -55,7 +55,7 @@ internal class ReliableDataTransferReceive
     /// <param name="data">datan sisaltava tavutaulukko</param>
     /// <param name="checksum">tavutaulukko, johon datasta laskettua tarkastussummaa verrataan</param>
     /// <returns>boolean-arvo tarkastussummien yhtasuuruudesta</returns>
-    private bool CompareChecksum(byte[] data, byte[] checksum)
+    private static bool CompareChecksum(byte[] data, byte[] checksum)
     {
         using (SHA256 sha = SHA256.Create())
         {

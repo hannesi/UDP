@@ -5,7 +5,7 @@ using System.Text;
 
 internal class ReliableDataTransferSend
 {
-    private UdpClient udpClient;
+    private readonly UdpClient udpClient;
     private static byte sequenceNumber = 0;
 
     public ReliableDataTransferSend(int port)
