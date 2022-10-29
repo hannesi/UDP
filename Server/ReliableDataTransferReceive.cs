@@ -13,7 +13,7 @@ internal class ReliableDataTransferReceive
     }
 
     /// <summary>
-    /// Vastaanottaa dataa udp-soketista. Mikali vastaanotettavan paketin data-osion tarkistussumma ei vastaa paketin mukana tulevaa lahettajan laskemaa tarkistussummaa, vastataan NACK ja odotetaan uudelleen lahetysta. Mikali tarkistussummat vastaavat, palautetaan data-osuus paketista.
+    /// Vastaanottaa dataa udp-soketista. Mikali vastaanotettavan paketin data-osion tarkistussumma ei vastaa paketin mukana tulevaa lahettajan laskemaa tarkistussummaa, vastataan NAK ja odotetaan uudelleen lahetysta. Mikali tarkistussummat vastaavat, palautetaan data-osuus paketista.
     /// </summary>
     internal byte[] Receive(ref IPEndPoint rep)
     {
@@ -30,8 +30,8 @@ internal class ReliableDataTransferReceive
         } 
         else
         {
-            Console.WriteLine("Tarkistussumma vaarin. Lahetetaan NACK ja odotetaan uudelleen lahettamista.");
-            response = Encoding.UTF8.GetBytes("NACK");
+            Console.WriteLine("Tarkistussumma vaarin. Lahetetaan NAK ja odotetaan uudelleen lahettamista.");
+            response = Encoding.UTF8.GetBytes("NAK");
             virtualUdp.Send(response, response.Length, rep);
             return Receive(ref rep);
         }

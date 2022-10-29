@@ -12,13 +12,13 @@ internal class ReliableDataTransferSend
         udpClient = new UdpClient(port);
     }
     /// <summary>
-    /// Lahettaa datasta ja tarkastussummasta koostetun paketin pyydettyyn kohteeseen ja odottaa ACK tai NACK. Mikali vastauksena NACK, lahetetaan paketti uudestaan kunnes vastauksena ACK.
+    /// Lahettaa datasta ja tarkastussummasta koostetun paketin pyydettyyn kohteeseen ja odottaa ACK tai NAK. Mikali vastauksena NACK, lahetetaan paketti uudestaan kunnes vastauksena ACK.
     /// </summary>
     internal void Send(byte[] data, string v, int destPort)
     {
         byte[] packet = MakePacket(data);
         udpClient.Send(packet, packet.Length, v, destPort);
-        Console.WriteLine("Viesti lahetetty, odotetaan ACK tai NACK.");
+        Console.WriteLine("Viesti lahetetty, odotetaan ACK tai NAK.");
         var rep = new IPEndPoint(IPAddress.Any, 0);
         byte[] response = udpClient.Receive(ref rep);
         string responseString = Encoding.UTF8.GetString(response);
@@ -26,9 +26,9 @@ internal class ReliableDataTransferSend
         {
             Console.WriteLine("Vastaanotettu ACK.");
         }
-        else if (responseString.Equals("NACK"))
+        else if (responseString.Equals("NAK"))
         {
-            Console.WriteLine("Vastaanotettu NACK. Lahetetaan paketti uudestaan.");
+            Console.WriteLine("Vastaanotettu NAK. Lahetetaan paketti uudestaan.");
             Send(data, v, destPort);
         }
     }
