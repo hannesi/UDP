@@ -23,8 +23,6 @@ internal class ReliableDataTransferReceive
         if (seq.Equals(lastCorrectSeq))
         {
             Console.WriteLine("Vastaanotettu duplikaatti, jatetaan palauttamatta. Sisalto: " + Encoding.UTF8.GetString(data));
-            // responseACK = MakeACK(lastCorrectSeq);
-            // virtualUdp.Send(responseACK, responseACK.Length, rep);
             return Array.Empty<byte>();
         }
         bool valid = CompareChecksum(data, checksum);
