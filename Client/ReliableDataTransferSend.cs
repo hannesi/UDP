@@ -1,4 +1,5 @@
-﻿using System.Net.Sockets;
+﻿using System.Net;
+using System.Net.Sockets;
 using System.Security.Cryptography;
 using System.Text;
 
@@ -10,11 +11,26 @@ internal class ReliableDataTransferSend
     {
         udpClient = new UdpClient(port);
     }
-
+    /// <summary>
+    /// Lahettaa datasta ja tarkastussummasta koostetun paketin pyydettyyn kohteeseen ja odottaa ACK tai NACK. Mikali vastauksena NACK, lahetetaan paketti uudestaan kunnes vastauksena ACK.
+    /// </summary>
     internal void Send(byte[] data, string v, int destPort)
     {
         byte[] packet = MakePacket(data);
         udpClient.Send(packet, packet.Length, v, destPort);
+        Console.WriteLine("Viesti lahetetty, odotetaan ACK tai NACK.");
+        var rep = new IPEndPoint(IPAddress.Any, 0);
+        byte[] response = udpClient.Receive(ref rep);
+        string responseString = Encoding.UTF8.GetString(response);
+        if (responseString.Equals("ACK"))
+        {
+            Console.WriteLine("Vastaanotettu ACK.");
+        }
+        else if (responseString.Equals("NACK"))
+        {
+            Console.WriteLine("Vastaanotettu NACK. Lahetetaan paketti uudestaan.");
+            Send(data, v, destPort);
+        }
     }
 
     /// <summary>

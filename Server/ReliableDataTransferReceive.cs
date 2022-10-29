@@ -12,16 +12,29 @@ internal class ReliableDataTransferReceive
         virtualUdp = new VirtualUdpClient(port);
     }
 
+    /// <summary>
+    /// Vastaanottaa dataa udp-soketista. Mikali vastaanotettavan paketin data-osion tarkistussumma ei vastaa paketin mukana tulevaa lahettajan laskemaa tarkistussummaa, vastataan NACK ja odotetaan uudelleen lahetysta. Mikali tarkistussummat vastaavat, palautetaan data-osuus paketista.
+    /// </summary>
     internal byte[] Receive(ref IPEndPoint rep)
     {
         byte[] packet = virtualUdp.Receive(ref rep);
         (byte[] data, byte[] checksum) = SplitPacket(packet);
         bool valid = CompareChecksum(data, checksum);
-        if (!valid)
+        byte[] response;
+        if (valid)
         {
-            Console.WriteLine("Checksums don't match!");
+            Console.WriteLine("Tarkistussumma oikein. Lahetetaan ACK ja naytetaan data.");
+            response = Encoding.UTF8.GetBytes("ACK");
+            virtualUdp.Send(response, response.Length, rep);
+            return data;
         } 
-        return data;
+        else
+        {
+            Console.WriteLine("Tarkistussumma vaarin. Lahetetaan NACK ja odotetaan uudelleen lahettamista.");
+            response = Encoding.UTF8.GetBytes("NACK");
+            virtualUdp.Send(response, response.Length, rep);
+            return Receive(ref rep);
+        }
     }
 
     /// <summary>
@@ -33,7 +46,7 @@ internal class ReliableDataTransferReceive
     {
         byte[] data = packet.Take((int)(packet.Length - CHECKSUM_LENGTH)).ToArray();
         byte[] checksum = packet.Skip((int)(packet.Length - CHECKSUM_LENGTH)).ToArray();
-        return (checksum, data);
+        return (data, checksum);
     }
 
     /// <summary>
