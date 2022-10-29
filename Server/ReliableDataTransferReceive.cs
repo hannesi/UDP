@@ -1,11 +1,15 @@
-﻿using System.Net;
+﻿using System.Linq;
+using System.Net;
 using System.Security.Cryptography;
 using System.Text;
 
 internal class ReliableDataTransferReceive
 {
     private VirtualUdpClient virtualUdp;
-    private const uint CHECKSUM_LENGTH = 32;
+    private const int CHECKSUM_LENGTH = 32;
+    private const int SEQUENCE_LENGTH = 1;
+    // LAASTARI: alustetaan ykkonen, koska ensimmainen saapuva sekvenssi on 0
+    private byte lastCorrectSeq = 1;
 
     public ReliableDataTransferReceive(int port)
     {
@@ -15,13 +19,21 @@ internal class ReliableDataTransferReceive
     internal byte[] Receive(ref IPEndPoint rep)
     {
         byte[] packet = virtualUdp.Receive(ref rep);
-        (byte[] data, byte[] checksum) = SplitPacket(packet);
+        (byte seq, byte[] data, byte[] checksum) = SplitPacket(packet);
         bool valid = CompareChecksum(data, checksum);
-        if (!valid)
+        if (valid)
         {
-            Console.WriteLine("Checksums don't match!");
-        } 
-        return data;
+            lastCorrectSeq = seq;
+        }
+        Console.WriteLine("Saapuneen paketin sekvenssi: " + seq + ", Lahetetaan ACK " + lastCorrectSeq);
+        byte[] response = MakeACK(lastCorrectSeq);
+        virtualUdp.Send(response, response.Length, rep);
+        return valid ? data : Array.Empty<byte>();
+    }
+
+    private byte[] MakeACK(byte lastCorrectSeq)
+    {
+        return Encoding.UTF8.GetBytes("ACK ").Concat(new byte[] {lastCorrectSeq}).ToArray();
     }
 
     /// <summary>
@@ -29,11 +41,12 @@ internal class ReliableDataTransferReceive
     /// </summary>
     /// <param name="packet">Datasta ja tarkastussummasta koostuva paketti</param>
     /// <returns>Tavutaulukot, joista ensimmainen sisaltaa datan ja jalkimmainen tarkastussumman</returns>
-    private (byte[], byte[]) SplitPacket(byte[] packet)
+    private (byte, byte[], byte[]) SplitPacket(byte[] packet)
     {
-        byte[] data = packet.Take((int)(packet.Length - CHECKSUM_LENGTH)).ToArray();
-        byte[] checksum = packet.Skip((int)(packet.Length - CHECKSUM_LENGTH)).ToArray();
-        return (checksum, data);
+        byte sequenceNumber = packet.First();
+        byte[] data = packet.Skip(SEQUENCE_LENGTH).Take(packet.Length - CHECKSUM_LENGTH - SEQUENCE_LENGTH).ToArray();
+        byte[] checksum = packet.Skip(packet.Length - CHECKSUM_LENGTH).ToArray();
+        return (sequenceNumber, data, checksum);
     }
 
     /// <summary>

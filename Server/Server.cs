@@ -13,8 +13,11 @@ class Server
         while (true) {
             var rep = new IPEndPoint(IPAddress.Any, 0);
             byte[] rec = rdtReceive.Receive(ref rep);
-            string s = Encoding.UTF8.GetString(rec);
-            Console.WriteLine(s);
+            if (rec.Length > 0)
+            {
+                string s = Encoding.UTF8.GetString(rec);
+                Console.WriteLine(s);
+            }
         }
     }
 }
