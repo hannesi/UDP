@@ -5,12 +5,14 @@ using System.Text;
 
 internal class ReliableDataTransferSend
 {
+    private static int ACK_LISTEN_TIMEOUT = 1000;
     private readonly UdpClient udpClient;
     private static byte sequenceNumber = 0;
 
     public ReliableDataTransferSend(int port)
     {
         udpClient = new UdpClient(port);
+        udpClient.Client.ReceiveTimeout = ACK_LISTEN_TIMEOUT;
     }
 
     internal void Send(byte[] data, string v, int destPort)
@@ -24,12 +26,26 @@ internal class ReliableDataTransferSend
     {
         udpClient.Send(packet, packet.Length, v, destPort);
         var rep = new IPEndPoint(IPAddress.Any, 0);
-        byte[] response = udpClient.Receive(ref rep);
+        byte[] response;
+        try
+        {
+            response = udpClient.Receive(ref rep);
+        }
+        catch (Exception)
+        {
+            // jos ACKia ei kuulu, lahetetaan uudestaan
+            Console.WriteLine("ACKia ei kuulu, lahetetaan uudelleen");
+            SendPacket(packet, v, destPort);
+            return;
+        }
         (string res, byte seq) = ParseResponse(response);
+        // jos vaara sekvenssinumero, lahetetaan paketti uudelleen
         if (res.Equals("ACK") && !seq.Equals(sequenceNumber))
         {
             SendPacket(packet, v, destPort);
+            return;
         }
+        Console.WriteLine("Toimitettu onnistuneesti");
     }
 
     private (string, byte) ParseResponse(byte[] response)

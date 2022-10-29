@@ -7,6 +7,7 @@ class Client
     private const int DEFAULT_PORT = 6665;
     private const int DEFAULT_DEST_PORT = 6666;
     private const string QUIT_COMMAND = "/quit";
+    private const string SEND_ALPHABET_COMMAND = "/alphabet";
 
     static void Main(String[] args)
     {
@@ -17,6 +18,11 @@ class Client
         {
             string message = Console.ReadLine() ?? string.Empty;
             if (message == QUIT_COMMAND) return;
+            if (message == SEND_ALPHABET_COMMAND)
+            {
+                SendAlphabet(rdtSend, destPort);
+                continue;
+            }
             // jos syotteena tyhja merkkijono, ei laheteta
             if (message == string.Empty) continue;
             byte[] data = Encoding.UTF8.GetBytes(message);
@@ -28,6 +34,17 @@ class Client
             {
                 Console.WriteLine(e);
             }
+        }
+    }
+
+    /// <summary>
+    /// Automaattista testailua varten oleva funktio. Lahettaa aakkoset yksitellen.
+    /// </summary>
+    private static void SendAlphabet(ReliableDataTransferSend rdtSend, int destPort)
+    {
+        for (char c = 'a'; c <= 'z'; c++)
+        {
+            rdtSend.Send(BitConverter.GetBytes(c), "localhost", destPort);
         }
     }
 }

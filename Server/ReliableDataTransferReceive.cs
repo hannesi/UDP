@@ -20,14 +20,22 @@ internal class ReliableDataTransferReceive
     {
         byte[] packet = virtualUdp.Receive(ref rep);
         (byte seq, byte[] data, byte[] checksum) = SplitPacket(packet);
+        byte[] responseACK;
+        if (seq.Equals(lastCorrectSeq))
+        {
+            Console.WriteLine("Vastaanotettu duplikaatti, jatetaan palauttamatta. Sisalto: " + Encoding.UTF8.GetString(data));
+            responseACK = MakeACK(lastCorrectSeq);
+            virtualUdp.Send(responseACK, responseACK.Length, rep);
+            return Array.Empty<byte>();
+        }
         bool valid = CompareChecksum(data, checksum);
         if (valid)
         {
             lastCorrectSeq = seq;
-        }
+        } 
         Console.WriteLine("Saapuneen paketin sekvenssi: " + seq + ", Lahetetaan ACK " + lastCorrectSeq);
-        byte[] response = MakeACK(lastCorrectSeq);
-        virtualUdp.Send(response, response.Length, rep);
+        responseACK = MakeACK(lastCorrectSeq);
+        virtualUdp.Send(responseACK, responseACK.Length, rep);
         return valid ? data : Array.Empty<byte>();
     }
 

@@ -4,11 +4,13 @@ using System.Net.Sockets;
 class VirtualUdpClient : UdpClient
 {
     // paketin pudottamisen todennaikoisyys
-    private static double packetDropChance = 0;
+    private static double packetDropChance = 0.25;
     // paketin viivastyttamisen todennakoisyys
-    private static double packetDelayChance = 0;
+    private static double packetDelayChance = 0.25;
     // viivastyneen paketin viive ms
-    private static int packetDelayMs = 1000;
+    private static int packetDelayMs = 3000;
+    private static int packetDelayMsMin = 500;
+    private static int packetDelayMsMax = 2000;
     // bittivirheen todennakoisyys
     private static double packetBitErrorChance = 0.25;
     private static readonly Random random = new();
@@ -36,7 +38,8 @@ class VirtualUdpClient : UdpClient
             if (random.NextDouble() <= packetDelayChance)
             {
                 Console.WriteLine("Paketti viivästyy!");
-                Thread.Sleep(packetDelayMs);
+                // Thread.Sleep(packetDelayMs);
+                Thread.Sleep((int)random.NextInt64(packetDelayMsMin, packetDelayMsMax));
             }
             return bytes;
         }

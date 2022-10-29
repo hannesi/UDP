@@ -16,7 +16,7 @@ class Server
             if (rec.Length > 0)
             {
                 string s = Encoding.UTF8.GetString(rec);
-                Console.WriteLine(s);
+                Console.WriteLine("RDT:lta saatu viesti: " + s);
             }
         }
     }
